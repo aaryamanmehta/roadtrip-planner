@@ -40,7 +40,7 @@ function Map() {
         <Autocomplete>
             <input
                 type="text"
-                placeholder="Enter a location"
+                placeholder="Enter your origin"
                 style={{
                     border: `1px solid black`,
                     width: `240px`,
