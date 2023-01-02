@@ -25,6 +25,7 @@ const options = {
 
 function Map() {
     const [map, setMap] = React.useState(/** @type google.maps.Map */ (null))
+    const [visibility, setVisibility] = React.useState(false)
     const [origin, setOrigin] = React.useState(null)
     const onOriginLoad = ref => {
         setOrigin(ref);
@@ -40,6 +41,8 @@ function Map() {
     const originRef = React.useRef()
     /** @type React.MutableRefObject<HTMLInputElement> */
     const destinationRef = React.useRef()
+
+    // onClick functions
     async function calculateRoute() {
         if (originRef.current.value === '' || destinationRef.current.value === '') {
           return
@@ -54,7 +57,24 @@ function Map() {
         setDistance(results.routes[0].legs[0].distance.text)
         setDuration(results.routes[0].legs[0].duration.text)
     }
-
+    function makeVisible() {
+        if (originRef.current.value === '' || destinationRef.current.value === '') {
+            return
+        }
+        setVisibility(true)
+    }
+    function clearInformation() {
+        setVisibility(false); 
+        setDirectionsService(null);
+        setDistance(null); 
+        setDuration(null); 
+        map.panTo(center)
+        map.setZoom(3)
+        origin.getPlaces()[0].geometry.location = center
+        destination.getPlaces()[0].geometry.location = center
+        originRef.current.value = '';
+        destinationRef.current.value = '';
+    }
     return (
         <LoadScript
             googleMapsApiKey="AIzaSyDCdzSKDsuKcjUUh8DwL7lB_TOKWn6AHIc"
@@ -150,7 +170,7 @@ function Map() {
                     left: "21.5%",
                     top: "9.5%",
                 }}
-                onClick = {() => map.panTo(destination.getPlaces()[0].geometry.location)}
+                onClick = {()=> map.panTo(destination.getPlaces()[0].geometry.location)}
             />
             <input
                 type="button"
@@ -168,10 +188,28 @@ function Map() {
                     left: "1.5%",
                     top: "16.5%",
                 }}
-                onClick = {function(event) { calculateRoute();}}
+                onClick = {function(event) { calculateRoute(); makeVisible();}}
+            />
+            <input
+                type="button"
+                value="X"
+                style={{
+                    width: `32px`,
+                    height: `34px`,
+                    paddingTop: '3.5px',
+                    boxShadow: `0 2px 6px rgba(0, 0, 0, 0.3)`,
+                    fontSize: `15px`,
+                    color: '#333333',
+                    fontFamily: 'Helvetica',
+                    textOverflow: `ellipses`,
+                    position: "absolute",
+                    left: "21.5%",
+                    top: "16.5%",
+                }}
+                onClick = {clearInformation}
             />
             <div>
-                <p style={{                
+                {visibility && <p style={{                
                     width: '247px',
                     height: `50px`,
                     padding: '9.5px',
@@ -185,8 +223,8 @@ function Map() {
                     position: "absolute",
                     left: "1.5%",
                     top: "22%",
-                }}>Distance: {distance}</p>
-                <p style={{
+                }}>Distance: {distance}</p> }
+                {visibility && <p style={{
                     padding: '10.5px',
                     fontSize: `15px`,
                     color: '#333333',
@@ -195,7 +233,7 @@ function Map() {
                     position: "absolute",
                     left: "1.5%",
                     top: "26.7%",
-                }}>Duration: {duration}</p>
+                }}>Duration: {duration}</p> }
             </div>
         </GoogleMap>
         </LoadScript>
